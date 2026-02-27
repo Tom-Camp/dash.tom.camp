@@ -14,7 +14,6 @@ export async function loader({ request }: Route.LoaderArgs):Promise<any> {
 const NulayPage = ({ loaderData }: Route.ComponentProps) => {
   const { readings } = loaderData;
   const lastElement = readings.length > 0 ? readings[readings.length - 1] : undefined;
-console.log(lastElement);
   return (
     <section>
       <h1 className="text-3xl font-bold mb-2">🥚 The Nu Lay Inn 🐔</h1>
