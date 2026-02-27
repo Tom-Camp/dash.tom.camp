@@ -13,7 +13,7 @@ export async function loader({ request }: Route.LoaderArgs):Promise<any> {
 const NulayPage = ({ loaderData }: Route.ComponentProps) => {
   const { readings } = loaderData;
 
-  return ( 
+  return (
     <section>
       <h1 className="text-3xl font-bold mb-2">🥚 The Nu Lay Inn 🐔</h1>
       <Card
@@ -25,5 +25,5 @@ const NulayPage = ({ loaderData }: Route.ComponentProps) => {
     </section>
   );
 }
- 
+
 export default NulayPage;
