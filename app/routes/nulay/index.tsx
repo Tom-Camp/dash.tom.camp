@@ -1,5 +1,6 @@
 import type { Route } from "./+types/index"
 import CoopTempChart from "~/components/CoopTempChart";
+import CoopHumidityChart from "~/components/CoopHumidityChart";
 import { Card } from "~/components/Card";
 import { CoopHeader } from "~/components/CoopHeader";
 import type { CoopSensor } from "~/types";
@@ -16,13 +17,14 @@ const NulayPage = ({ loaderData }: Route.ComponentProps) => {
   const lastElement = readings.length > 0 ? readings[readings.length - 1] : undefined;
   return (
     <section>
-      <h1 className="text-3xl font-bold mb-2">🥚 The Nu Lay Inn 🐔</h1>
+      <h1 className="text-3xl font-bold mb-2">🥚 The NuLay Inn 🐔</h1>
       {lastElement && <CoopHeader reading={lastElement} />}
-      <Card
-        title="Chicken Coop Temperature"
-      >
+      <Card title="Temperature" className="mb-4">
         <CoopTempChart data={readings} />
       </Card>
+    <Card title="Humidity" className="mb-4">
+        <CoopHumidityChart data={readings} />
+    </Card>
     </section>
   );
 }

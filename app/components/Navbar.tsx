@@ -37,7 +37,7 @@ const Navbar = () => {
 							className={({ isActive }) => (isActive ? active : base)}
 							to="/nulay"
 						>
-							Nu Lay Inn
+							NuLay Inn
 						</NavLink>
 					</div>
 				</div>
