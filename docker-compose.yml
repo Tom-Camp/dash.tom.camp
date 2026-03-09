@@ -1,0 +1,6 @@
+services:
+  data-ui:
+    image: yourdockerhubusername/data-ui:latest
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

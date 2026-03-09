@@ -31,11 +31,11 @@ type RouteFiles = {
     id: "routes/home/index";
     page: "/";
   };
-  "./routes/germinator/index.tsx": {
+  "routes/germinator/index.tsx": {
     id: "routes/germinator/index";
     page: "/germinator";
   };
-  "./routes/nulay/index.tsx": {
+  "routes/nulay/index.tsx": {
     id: "routes/nulay/index";
     page: "/nulay";
   };
@@ -44,6 +44,6 @@ type RouteFiles = {
 type RouteModules = {
   "root": typeof import("./app/root.tsx");
   "routes/home/index": typeof import("./app/routes/home/index.tsx");
-  "routes/germinator/index": typeof import("./app/./routes/germinator/index.tsx");
-  "routes/nulay/index": typeof import("./app/./routes/nulay/index.tsx");
+  "routes/germinator/index": typeof import("./app/routes/germinator/index.tsx");
+  "routes/nulay/index": typeof import("./app/routes/nulay/index.tsx");
 };

@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -24,7 +25,7 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
-export function meta({}: Route.MetaArgs) {
+export function meta(_: Route.MetaArgs) {
   return [
     { title: "Data Tom.Camp" },
     { name: "description", content: "Random data from random sensors." },
@@ -43,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <Navbar />
         <main className="max-w-6xl mx-auto px-6 my-8">
-        {children}
+          {children}
         </main>
         <ScrollRestoration />
         <Scripts />
@@ -53,7 +54,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const navigation = useNavigation();
+  const loading = navigation.state === "loading";
+
+  return (
+    <>
+      {loading && (
+        <div className="fixed top-0 left-0 w-full h-1 bg-blue-500 animate-pulse z-50" />
+      )}
+      <Outlet />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
@@ -67,7 +78,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       error.status === 404
         ? "The requested page could not be found."
         : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
+  } else if (import.meta.env.DEV && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }

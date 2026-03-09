@@ -12,4 +12,9 @@ body {
   @media (prefers-color-scheme: dark) {
     color-scheme: dark;
   }
+  font-size: 120%;
+}
+
+main a {
+  color: theme(colors.orange.900);
 }

@@ -1,3 +1,25 @@
+export type GerminatorSensor = {
+  id: string;
+  created_date: string;
+  updated_date: string;
+  data: {
+    air: {
+      humidity?: {
+        actual: number;
+        target: [number, number];
+      };
+      temperature?: {
+        actual: number;
+        target: [number, number];
+      };
+    };
+    soil: {
+      moisture?: number;
+      soil_temp?: number;
+    };
+    lights: boolean;
+  };
+};
 
 export type CoopSensor = {
   _id: string;
@@ -11,7 +33,7 @@ export type CoopSensor = {
     coop: {
       coop_humidity: number;
       coop_temp: number;
-      coop_gas: number;
+      coop_gas: number; // VOC index
       coop_pressure: number;
     };
   };
