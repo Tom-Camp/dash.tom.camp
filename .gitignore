@@ -23,6 +23,9 @@ yarn-error.log*
 *.njsproj
 *.sln
 
+# React Router generated types
+.react-router/
+
 # TypeScript
 *.tsbuildinfo
 
