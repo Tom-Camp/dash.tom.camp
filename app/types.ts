@@ -19,11 +19,13 @@ export type GerminatorSensor = {
     };
     lights: boolean;
   };
+  device_id: string;
 };
 
 export type CoopSensor = {
   _id: string;
   created_date: string;
+  updated_date: string;
   data: {
     battery: number;
     outside: {
