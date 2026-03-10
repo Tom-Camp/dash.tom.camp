@@ -7,9 +7,14 @@ import GerminatorSoilChart from "~/components/GerminatorSoilChart";
 import type { GerminatorSensor } from "~/types";
 
 export async function loader(_: Route.LoaderArgs): Promise<any> {
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/devices/${import.meta.env.VITE_GERMINATOR_DEVICE_ID}?data_limit=48`);
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/data/device/${import.meta.env.VITE_GERMINATOR_DEVICE_ID}?limit=48`);
   const json = await response.json();
-  const readings: GerminatorSensor[] = Array.isArray(json) ? json : json.data;
+  let readings: GerminatorSensor[];
+  if (Array.isArray(json)) {
+    readings = json.reverse();
+  } else {
+    readings = [];
+  }
 
   return { readings };
 }

@@ -4,13 +4,19 @@ import CoopHumidityChart from "~/components/CoopHumidityChart";
 import CoopVocChart from "~/components/CoopVocChart";
 import { Card } from "~/components/Card";
 import { CoopHeader } from "~/components/CoopHeader";
-import type { CoopSensor } from "~/types";
+import type {CoopSensor, GerminatorSensor} from "~/types";
 
 export async function loader(_: Route.LoaderArgs): Promise<any> {
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/devices/${import.meta.env.VITE_NULAY_DEVICE_ID}?data_limit=24`);
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/data/device/${import.meta.env.VITE_NULAY_DEVICE_ID}?limit=24`);
   const data = await response.json();
+    let readings: CoopSensor[];
+    if (Array.isArray(data)) {
+        readings = data.reverse();
+    } else {
+        readings = [];
+    }
 
-  return { readings: data.data as CoopSensor[] };
+    return { readings };
 }
 
 const NulayPage = ({ loaderData }: Route.ComponentProps) => {
