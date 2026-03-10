@@ -6,7 +6,7 @@ import GerminatorHumidityChart from "~/components/GerminatorHumidityChart";
 import GerminatorSoilChart from "~/components/GerminatorSoilChart";
 import type { GerminatorSensor } from "~/types";
 
-export async function loader({ request }: Route.LoaderArgs): Promise<any> {
+export async function loader(_: Route.LoaderArgs): Promise<any> {
   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/devices/${import.meta.env.VITE_GERMINATOR_DEVICE_ID}?data_limit=48`);
   const json = await response.json();
   const readings: GerminatorSensor[] = Array.isArray(json) ? json : json.data;
