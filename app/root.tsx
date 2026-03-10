@@ -46,6 +46,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <main className="max-w-6xl mx-auto px-6 my-8">
           {children}
         </main>
+        <footer className="text-center text-sm text-slate-500 dark:text-slate-400 py-6">
+          &copy; {new Date().getFullYear()}{" "}
+          <a href="https://tom.camp" target="_blank" rel="noopener noreferrer" className="hover:underline">tom.camp</a>
+        </footer>
         <ScrollRestoration />
         <Scripts />
       </body>

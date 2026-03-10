@@ -6,7 +6,7 @@ import { Card } from "~/components/Card";
 import { CoopHeader } from "~/components/CoopHeader";
 import type { CoopSensor } from "~/types";
 
-export async function loader({ request }: Route.LoaderArgs): Promise<any> {
+export async function loader(_: Route.LoaderArgs): Promise<any> {
   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/devices/${import.meta.env.VITE_NULAY_DEVICE_ID}?data_limit=24`);
   const data = await response.json();
 

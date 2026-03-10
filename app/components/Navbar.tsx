@@ -16,7 +16,7 @@ const Navbar = () => {
 					className="flex items-center gap-2 text-lg font-bold text-blue-300"
 				>
 					<SiDatabricks className="text-blue-400 text-xl" />
-					<span>Data Tom.Camp</span>
+					<span>Tom.Camp Dashboard</span>
 				</NavLink>
 				{/* Desktop nav */}
 				<div className="hidden md:flex items-center gap-6">
