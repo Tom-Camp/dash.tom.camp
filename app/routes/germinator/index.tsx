@@ -9,19 +9,14 @@ import type { GerminatorSensor } from "~/types";
 export async function loader(_: Route.LoaderArgs): Promise<any> {
   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/data/device/${import.meta.env.VITE_GERMINATOR_DEVICE_ID}?limit=48`);
   const json = await response.json();
-  let readings: GerminatorSensor[];
-  if (Array.isArray(json)) {
-    readings = json.reverse();
-  } else {
-    readings = [];
-  }
+  const readings: GerminatorSensor[] = Array.isArray(json) ? json.reverse() : [];
 
   return { readings };
 }
 
 const GerminatorPage = ({ loaderData }: Route.ComponentProps) => {
   const { readings } = loaderData;
-  const lastElement = readings.length > 0 ? readings[0] : undefined;
+  const lastElement = readings.length > 0 ? readings[readings.length - 1] : undefined;
 
   return (
     <section>
