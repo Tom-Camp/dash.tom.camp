@@ -1,7 +1,7 @@
 import type { Route } from "./+types/index";
 import { Link } from "react-router";
-import { Card } from "~/components/Card";
-
+import type { CoopSensor, GerminatorSensor } from "~/types";
+import { formatCoopDate, coopDateFormatter } from "~/utils/dateFormatter";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -10,34 +10,168 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
-  return <section>
-    <Link to="/germinator">
-      <Card title="🌱 Germinator" className="mb-4">
-        <p className="mb-2">
-          The Germinator is a seed germination station. It uses a warming mat to maintain the proper soil temperature
-          and sensors to monitor the air and soil temperature, the station humidity and soil moisture. The system is
-          designed to use the science of photobiology— specifically the subfield focused on how light wavelengths affect
-          plant growth and development.
-        </p>
-      </Card>
-    </Link>
-    <Link to="/nulay">
-      <Card title="🐔 NuLay Inn" className="mb-4">
-        <p className="mb-2">The NuLay Inn is a sensor package for monitoring the environment in our chicken coop. It is
-          designed to be used with the Adafruit Feather RP2040 RFM95, an Adafruit BME680 - Temperature, Humidity, Pressure
-          and Gas Sensor, and an Adafruit AHT20 - Temperature & Humidity Sensor Breakout Board.
-        </p>
-        <p className="mb-2">
-          The name NuLay Inn is a nod to the historic NuWray Hotel here in Burnsville, North Carolina.
-        </p>
-        <p className="mb-2">
-          The system is designed to run with a battery and solar panel, and is capable of sending data to a server via LoRa.
-          The data is then sent to an API server for storage and analysis. The system is designed to be low power, with a sleep
-          mode that sends data every hour. The AHT20 sensor is used for temperature and humidity outside the coop, while the
-          BME680 sensor is for temperature, humidity, pressure and gas inside the coop.
-        </p>
-      </Card>
-    </Link>
-  </section>;
+export async function loader(_: Route.LoaderArgs): Promise<any> {
+  const [germinatorRes, nulayRes] = await Promise.allSettled([
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/data/device/${import.meta.env.VITE_GERMINATOR_DEVICE_ID}?limit=1`),
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/data/device/${import.meta.env.VITE_NULAY_DEVICE_ID}?limit=1`),
+  ]);
+
+  let germinator: GerminatorSensor | null = null;
+  let nulay: CoopSensor | null = null;
+
+  if (germinatorRes.status === "fulfilled" && germinatorRes.value.ok) {
+    const json = await germinatorRes.value.json();
+    germinator = Array.isArray(json) && json.length > 0 ? json[0] : null;
+  }
+
+  if (nulayRes.status === "fulfilled" && nulayRes.value.ok) {
+    const json = await nulayRes.value.json();
+    nulay = Array.isArray(json) && json.length > 0 ? json[0] : null;
+  }
+
+  return { germinator, nulay };
+}
+
+type StatProps = {
+  label: string;
+  value: string;
+  sub?: string;
+  color: string;
+};
+
+function Stat({ label, value, sub, color }: StatProps) {
+  return (
+    <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-3">
+      <div className="flex items-center gap-1.5 mb-1">
+        <span className={`h-2 w-2 flex-shrink-0 rounded-full ${color}`} />
+        <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</span>
+      </div>
+      <p className="text-base font-semibold text-slate-800">{value}</p>
+      {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+    </div>
+  );
+}
+
+export default function Home({ loaderData }: Route.ComponentProps) {
+  const { germinator, nulay } = loaderData;
+
+  return (
+    <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <Link to="/germinator" className="block group">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden transition-shadow group-hover:shadow-md">
+          <div className="bg-slate-900 px-4 py-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-white">🌱 Germinator</h2>
+              {germinator && (
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Last reading: {formatCoopDate(germinator.created_date)}
+                </p>
+              )}
+            </div>
+            <span className="text-slate-400 text-sm group-hover:text-white transition-colors">View →</span>
+          </div>
+          <div className="px-4 py-4">
+            {germinator ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <Stat
+                  label="Lights"
+                  value={germinator.data.lights ? "On" : "Off"}
+                  color={germinator.data.lights ? "bg-yellow-300" : "bg-slate-400"}
+                />
+                {germinator.data.air.temperature && (
+                  <Stat
+                    label="Air Temp"
+                    value={`${germinator.data.air.temperature.actual.toFixed(1)}°`}
+                    sub={`target ${germinator.data.air.temperature.target[0]}–${germinator.data.air.temperature.target[1]}°`}
+                    color="bg-amber-400"
+                  />
+                )}
+                {germinator.data.air.humidity && (
+                  <Stat
+                    label="Humidity"
+                    value={`${germinator.data.air.humidity.actual.toFixed(0)}%`}
+                    sub={`target ${germinator.data.air.humidity.target[0]}–${germinator.data.air.humidity.target[1]}%`}
+                    color="bg-sky-400"
+                  />
+                )}
+                {germinator.data.soil.soil_temp !== undefined && (
+                  <Stat
+                    label="Soil Temp"
+                    value={`${germinator.data.soil.soil_temp.toFixed(1)}°`}
+                    color="bg-violet-400"
+                  />
+                )}
+                {germinator.data.soil.moisture !== undefined && (
+                  <Stat
+                    label="Moisture"
+                    value={String(germinator.data.soil.moisture)}
+                    color="bg-emerald-400"
+                  />
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400">No data available</p>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      <Link to="/nulay" className="block group">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden transition-shadow group-hover:shadow-md">
+          <div className="bg-slate-900 px-4 py-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-white">🐔 NuLay Inn</h2>
+              {nulay && (
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Last reading:{" "}
+                  {coopDateFormatter.format(
+                    new Date(nulay.created_date.endsWith("Z") ? nulay.created_date : nulay.created_date + "Z")
+                  )}
+                </p>
+              )}
+            </div>
+            <span className="text-slate-400 text-sm group-hover:text-white transition-colors">View →</span>
+          </div>
+          <div className="px-4 py-4">
+            {nulay ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <Stat
+                  label="Battery"
+                  value={`${nulay.data.battery.toFixed(1)} V`}
+                  color="bg-emerald-400"
+                />
+                <Stat
+                  label="Outside Temp"
+                  value={`${nulay.data.outside.air_temp.toFixed(1)}°`}
+                  color="bg-sky-400"
+                />
+                <Stat
+                  label="Outside Humidity"
+                  value={`${nulay.data.outside.humidity.toFixed(0)}%`}
+                  color="bg-sky-300"
+                />
+                <Stat
+                  label="Coop Temp"
+                  value={`${nulay.data.coop.coop_temp.toFixed(1)}°`}
+                  color="bg-amber-400"
+                />
+                <Stat
+                  label="Coop Humidity"
+                  value={`${nulay.data.coop.coop_humidity.toFixed(0)}%`}
+                  color="bg-amber-300"
+                />
+                <Stat
+                  label="Gas (VOC)"
+                  value={`${nulay.data.coop.coop_gas.toFixed(0)} ppm`}
+                  color="bg-rose-400"
+                />
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400">No data available</p>
+            )}
+          </div>
+        </div>
+      </Link>
+    </section>
+  );
 }
