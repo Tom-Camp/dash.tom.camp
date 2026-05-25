@@ -22,6 +22,24 @@ export type GerminatorSensor = {
   device_id: string;
 };
 
+export type GardenDevice = {
+  id: string;
+  name: string;
+  description?: string;
+  notes?: string;
+};
+
+export type GardenSensor = {
+  id: string;
+  created_date: string;
+  updated_date: string;
+  data: {
+    moisture: number;
+    temperature: number;
+  };
+  device_id: string;
+};
+
 export type CoopSensor = {
   _id: string;
   created_date: string;
