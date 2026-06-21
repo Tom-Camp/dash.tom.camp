@@ -34,8 +34,9 @@ export type GardenSensor = {
   created_date: string;
   updated_date: string;
   data: {
-    moisture: number;
-    temperature: number;
+    soil: number;
+    temp: number;
+    battery: number;
   };
   device_id: string;
 };

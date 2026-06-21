@@ -57,7 +57,7 @@ const GardenNetPage = ({ loaderData }: Route.ComponentProps) => {
           <Card
             key={deviceId}
             title={name}
-            subtitle={latest ? `Last reading: ${formatCoopDate(latest.created_date)}` : undefined}
+            subtitle={latest ? `Last reading: ${formatCoopDate(latest.created_date)} -- Battery: ${latest.data.battery.toFixed(2)}V` : undefined}
             className="mb-4"
           >
             {readings.length > 0 ? (

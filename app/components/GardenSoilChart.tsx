@@ -13,8 +13,8 @@ interface GardenSoilChartProps {
 const GardenSoilChart: React.FC<GardenSoilChartProps> = ({ data }) => {
   const chartData = data.map((e) => ({
     time: formatCoopDate(e.created_date),
-    temperature: e.data.temperature,
-    moisture: e.data.moisture,
+    temperature: e.data.temp,
+    soil: e.data.soil,
   }));
 
   return (
@@ -28,7 +28,7 @@ const GardenSoilChart: React.FC<GardenSoilChartProps> = ({ data }) => {
           tickFormatter={(v) => v.toFixed(0) + "°"}
         />
         <YAxis
-          yAxisId="moisture"
+          yAxisId="soil"
           orientation="right"
           domain={[200, 2000]}
           label={{ value: "Moisture", angle: 90, position: "insideRight" }}
@@ -41,7 +41,7 @@ const GardenSoilChart: React.FC<GardenSoilChartProps> = ({ data }) => {
         />
         <Legend />
         <Line yAxisId="temp" type="monotone" dataKey="temperature" stroke="#f97316" name="Temperature" dot={false} />
-        <Line yAxisId="moisture" type="monotone" dataKey="moisture" stroke="#22d3ee" name="Moisture" dot={false} />
+        <Line yAxisId="soil" type="monotone" dataKey="soil" stroke="#22d3ee" name="Moisture" dot={false} />
       </LineChart>
     </ResponsiveContainer>
   );

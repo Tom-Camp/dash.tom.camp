@@ -238,14 +238,20 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   ({ deviceId, name, reading }: { deviceId: string; name: string; reading: any }) =>
                     reading ? (
                       <React.Fragment key={deviceId}>
+                        <p className="col-span-2 sm:col-span-3 text-xs font-semibold text-slate-500 uppercase tracking-wide mt-1">{name}</p>
                         <Stat
-                          label={`${name} Temp`}
-                          value={`${reading.data.temperature.toFixed(1)}°F`}
+                          label={`Temp`}
+                          value={`${reading.data.temp.toFixed(1)}°F`}
                           color="bg-orange-400"
                         />
                         <Stat
-                          label={`${name} Moisture`}
-                          value={String(reading.data.moisture)}
+                          label={`Moisture`}
+                          value={`${reading.data.soil.toFixed(0)}`}
+                          color="bg-cyan-400"
+                        />
+                        <Stat
+                          label={`Battery`}
+                          value={`${reading.data.battery.toFixed(2)}V`}
                           color="bg-cyan-400"
                         />
                       </React.Fragment>
