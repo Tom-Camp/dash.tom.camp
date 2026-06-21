@@ -1,6 +1,7 @@
+import React from "react";
 import type { Route } from "./+types/index";
 import { Link } from "react-router";
-import type { CoopSensor, GerminatorSensor } from "~/types";
+import type { CoopSensor, GardenDevice, GardenSensor, GerminatorSensor } from "~/types";
 import { formatCoopDate, coopDateFormatter } from "~/utils/dateFormatter";
 
 export function meta({}: Route.MetaArgs) {
@@ -11,9 +12,17 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export async function loader(_: Route.LoaderArgs): Promise<any> {
-  const [germinatorRes, nulayRes] = await Promise.allSettled([
+  const gardenDeviceIds = (import.meta.env.VITE_GARDEN_NET_DEVICE_IDS ?? "")
+    .split(",")
+    .map((id: string) => id.trim())
+    .filter(Boolean);
+
+  const [germinatorRes, nulayRes, ...gardenResults] = await Promise.allSettled([
     fetch(`${import.meta.env.VITE_API_BASE_URL}/data/device/${import.meta.env.VITE_GERMINATOR_DEVICE_ID}?limit=1`),
     fetch(`${import.meta.env.VITE_API_BASE_URL}/data/device/${import.meta.env.VITE_NULAY_DEVICE_ID}?limit=1`),
+    ...gardenDeviceIds.map((id: string) =>
+      fetch(`${import.meta.env.VITE_API_BASE_URL}/data/device/${id}?limit=1`)
+    ),
   ]);
 
   let germinator: GerminatorSensor | null = null;
@@ -29,7 +38,32 @@ export async function loader(_: Route.LoaderArgs): Promise<any> {
     nulay = Array.isArray(json) && json.length > 0 ? json[0] : null;
   }
 
-  return { germinator, nulay };
+  const deviceInfoResults = await Promise.allSettled(
+    gardenDeviceIds.map((id: string) =>
+      fetch(`${import.meta.env.VITE_API_BASE_URL}/devices/${id}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null)
+    )
+  );
+
+  const gardenLatest: { deviceId: string; name: string; reading: GardenSensor | null }[] = await Promise.all(
+    gardenResults.map(async (result, i) => {
+      const deviceInfo: GardenDevice | null =
+        deviceInfoResults[i].status === "fulfilled" ? deviceInfoResults[i].value : null;
+      const name = deviceInfo?.name ?? `Sensor ${i + 1}`;
+      if (result.status === "fulfilled" && result.value.ok) {
+        const json = await result.value.json();
+        return {
+          deviceId: gardenDeviceIds[i],
+          name,
+          reading: Array.isArray(json) && json.length > 0 ? json[0] : null,
+        };
+      }
+      return { deviceId: gardenDeviceIds[i], name, reading: null };
+    })
+  );
+
+  return { germinator, nulay, gardenLatest };
 }
 
 type StatProps = {
@@ -53,7 +87,19 @@ function Stat({ label, value, sub, color }: StatProps) {
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { germinator, nulay } = loaderData;
+  const { germinator, nulay, gardenLatest } = loaderData;
+
+  const gardenHasDevices = Array.isArray(gardenLatest) && gardenLatest.length > 0;
+  const gardenMostRecent = gardenHasDevices
+    ? gardenLatest.reduce(
+        (latest: { deviceId: string; reading: any } | null, d: { deviceId: string; reading: any }) => {
+          if (!d.reading) return latest;
+          if (!latest?.reading) return d;
+          return new Date(d.reading.created_date) > new Date(latest.reading.created_date) ? d : latest;
+        },
+        null
+      )
+    : null;
 
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -172,6 +218,50 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
       </Link>
+      {gardenHasDevices && (
+        <Link to="/garden-net" className="block group">
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden transition-shadow group-hover:shadow-md">
+            <div className="bg-slate-900 px-4 py-3 flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-white">🌿 Garden.net</h2>
+                {gardenMostRecent?.reading && (
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Last reading: {formatCoopDate(gardenMostRecent.reading.created_date)}
+                  </p>
+                )}
+              </div>
+              <span className="text-slate-400 text-sm group-hover:text-white transition-colors">View →</span>
+            </div>
+            <div className="px-4 py-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {gardenLatest.map(
+                  ({ deviceId, name, reading }: { deviceId: string; name: string; reading: any }) =>
+                    reading ? (
+                      <React.Fragment key={deviceId}>
+                        <p className="col-span-2 sm:col-span-3 text-xs font-semibold text-slate-500 uppercase tracking-wide mt-1">{name}</p>
+                        <Stat
+                          label={`Temp`}
+                          value={`${reading.data.temp.toFixed(1)}°F`}
+                          color="bg-orange-400"
+                        />
+                        <Stat
+                          label={`Moisture`}
+                          value={`${reading.data.soil.toFixed(0)}`}
+                          color="bg-cyan-400"
+                        />
+                        <Stat
+                          label={`Battery`}
+                          value={`${reading.data.battery.toFixed(2)}V`}
+                          color="bg-cyan-400"
+                        />
+                      </React.Fragment>
+                    ) : null
+                )}
+              </div>
+            </div>
+          </div>
+        </Link>
+      )}
     </section>
   );
 }

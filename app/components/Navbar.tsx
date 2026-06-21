@@ -39,6 +39,12 @@ const Navbar = () => {
 						>
 							NuLay Inn
 						</NavLink>
+						<NavLink
+							className={({ isActive }) => (isActive ? active : base)}
+							to="/garden-net"
+						>
+							Garden.net
+						</NavLink>
 					</div>
 				</div>
 
@@ -73,6 +79,13 @@ const Navbar = () => {
 							onClick={() => setMenuOpen(false)}
 						>
 							Nu Lay Inn
+						</NavLink>
+						<NavLink
+							className={({ isActive }) => (isActive ? active : base)}
+							to="/garden-net"
+							onClick={() => setMenuOpen(false)}
+						>
+							Garden.net
 						</NavLink>
 					</div>
 				)
