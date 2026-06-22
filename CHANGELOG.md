@@ -2,11 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## 1.0.0 (2026-05-22)
+## 1.1.0 (2026-06-22)
 
 
 ### Features
 
+* **garden-net:** adding garden.net soil sensors ([1d92b0d](https://github.com/Tom-Camp/dash.tom.camp/commit/1d92b0db63fb924b9d881d2704330cb9782544b4))
 * initial commit ([b516caf](https://github.com/Tom-Camp/dash.tom.camp/commit/b516cafe5e0d96c0f80f916bd9048d5ea6f8ae1c))
 
 
